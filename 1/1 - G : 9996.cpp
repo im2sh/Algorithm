@@ -29,6 +29,8 @@ int main(void) {
                 cout << "NE" << "\n";
         }
     }
+
+    return 0;
 }
 
 // 문제를 이해하지 못한 CASE 본보기로 삼자 !
