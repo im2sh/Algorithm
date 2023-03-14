@@ -19,6 +19,7 @@ int main(void) {
             scanf("%1d", &arr[i][j]);
         }
     }
+    cout << N << M;
 }
 
 
