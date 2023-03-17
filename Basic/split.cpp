@@ -24,4 +24,6 @@ int main(void) {
     for (string b: a)
         cout << b << "\n";
 
+
 }
+
