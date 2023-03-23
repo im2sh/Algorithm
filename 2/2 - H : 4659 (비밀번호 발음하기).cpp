@@ -41,6 +41,7 @@ int main(void) {
         M = false;
         flag = true;
         mflag = false;
+        int prev = 0;
         for (int i = 0; i < pw.size(); i++) {
             if (isM(pw[i])) {
                 mldx++;
@@ -55,9 +56,11 @@ int main(void) {
                 flag = false;
                 break;
             }
-
-            if ((pw[i] == pw[i - 1]) && pw[i] != 'e' && pw[i] != 'o')
+            if (i >= 1 && (prev == pw[i]) && (pw[i] != 'e' && pw[i] != 'o'))
                 flag = false;
+//            if (i(pw[i] == pw[i - 1]) && pw[i] != 'e' && pw[i] != 'o')
+//                flag = false;
+            prev = pw[i];
         }
         printPw();
     }
