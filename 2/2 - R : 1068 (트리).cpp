@@ -49,5 +49,5 @@ int main(void) {
     }
     dfs(rootIdx);
     cout << totalCnt << "\n";
-    return 0;l
+    return 0;
 }
