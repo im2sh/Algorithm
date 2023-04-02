@@ -11,10 +11,10 @@ const int dx[4] = {0, 1, 0, -1};
 
 char bomul[SIZE][SIZE];
 int visited[SIZE][SIZE];
-int result = -1;
+int result = 0;
 
 int findMax() {
-    int ret = -1;
+    int ret = 0;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
             ret = max(ret, visited[i][j]);
@@ -58,14 +58,13 @@ int main(void) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
             if (bomul[i][j] == 'L') {
+                fill(&visited[0][0], &visited[0][0] + SIZE * SIZE, 0);
                 bfs(i, j);
                 result = max(result, findMax());
-                fill(&visited[0][0], &visited[0][0] + SIZE * SIZE, 0);
             }
         }
     }
 
     cout << result - 1 << "\n";
     return 0;
-
 }
