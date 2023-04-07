@@ -51,18 +51,44 @@ void display_live() {
     cout << "\n";
 }
 
+bool sharkcheck() {
+    int cnt = 0;
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < N; x++) {
+            if (board[y][x].sharklive == true) {
+                cnt++;
+            }
+        }
+    }
+    if (cnt == 1)
+        return true;
+    return false;
+}
+
 void go_shark() {
     int sharkKill = M;
     int time = 0;
     bool isChange;
     while (time <= 1000) {
+//        if (sharkKill == 1)
+//            return;
+        if (sharkcheck())
+            return;
+
         time++;
-        cout << time << "=================" << "\n";
+        cout << time << " " << sharkKill << "=================" << "\n";
         display_s();
         display_t();
         display_live();
         cout << time << "=================" << "\n";
-        for (int s; s < M; s++) {
+        Board temp_board[20][20] = {0,};
+
+        for (int y = 0; y < N; y++) {
+            for (int x = 0; x < N; x++) {
+                temp_board[y][x] = board[y][x];
+            }
+        }
+        for (int s = 0; s < M; s++) {
             Shark ts = shark[s];
             if (ts.y == -1)
                 continue;
@@ -72,54 +98,63 @@ void go_shark() {
             int cd = ts.dir;
             isChange = false;
             for (int d = 0; d < 4; d++) {
-                int ny = cy + ts.pri[cd][d];
-                int nx = cx + ts.pri[cd][d];
+                int ny = cy + dy[ts.pri[cd][d]];
+                int nx = cx + dx[ts.pri[cd][d]];
 
-                if (ny < 0 || ny >= N || nx < 0 || ny >= N || board[ny][nx].t != 0)
+                if (ny < 0 || ny >= N || nx < 0 || nx >= N || board[ny][nx].t != 0)
                     continue;
                 isChange = true;
+                temp_board[cy][cx].sharklive = false;
+                if (temp_board[ny][nx].sharknum == 0) {
+                    temp_board[ny][nx].sharknum = s + 1;
+                    temp_board[ny][nx].sharklive = true;
+                    temp_board[ny][nx].t = K;
 
 
-                board[ny][nx].sharknum = s + 1;
-                board[ny][nx].sharklive = true;
-                board[ny][nx].t = K;
-
-                board[cy][cx].sharklive = false;
-
-                shark[s].y = ny;
-                shark[s].x = nx;
-                shark[s].dir = ts.pri[cd][d];
+                    shark[s].y = ny;
+                    shark[s].x = nx;
+                    shark[s].dir = ts.pri[cd][d];
+                } else if (temp_board[ny][nx].sharklive) {
+                    sharkKill--;
+                    shark[s].y = -1;
+                }
+                break;
             }
             if (!isChange) {
                 for (int d = 0; d < 4; d++) {
-                    int ny = cy + ts.pri[cd][d];
-                    int nx = cy + ts.pri[cd][d];
+                    int ny = cy + dy[ts.pri[cd][d]];
+                    int nx = cy + dx[ts.pri[cd][d]];
 
-                    if (ny < 0 || ny >= N || nx < 0 || ny >= N)
+                    if (ny < 0 || ny >= N || nx < 0 || nx >= N)
                         continue;
-                    if (board[ny][nx].sharknum == s + 1) {
+                    if (board[ny][nx].t != 0 && board[ny][nx].sharknum != s + 1)
+                        continue;
+                    temp_board[cy][cx].sharklive = false;
+                    if (temp_board[ny][nx].sharknum == s + 1) {
                         isChange = true;
-                        board[ny][nx].sharknum = s + 1;
-                        board[ny][nx].sharklive = true;
-                        board[ny][nx].t = K;
+                        temp_board[ny][nx].sharknum = s + 1;
+                        temp_board[ny][nx].sharklive = true;
+                        temp_board[ny][nx].t = K;
 
-                        board[cy][cx].sharklive = false;
+                        //temp_board[cy][cx].sharklive = false;
 
                         shark[s].y = ny;
                         shark[s].x = nx;
                         shark[s].dir = ts.pri[cd][d];
                     }
+                    if (!isChange) {
+                        temp_board[cy][cx].sharklive = false;
+                        shark[s].y = -1;
+                        sharkKill--;
+                    }
+                    break;
                 }
             }
-            if (!isChange) {
-                shark[s].y = -1;
-                sharkKill--;
-            }
         }
-        if (sharkKill == 1)
-            return;
+
         for (int y = 0; y < N; y++) {
             for (int x = 0; x < N; x++) {
+                board[y][x] = temp_board[y][x];
                 if (board[y][x].t > 0)
                     board[y][x].t--;
                 if (board[y][x].t == 0)
@@ -142,7 +177,7 @@ void Init() {
                 shark[sn].x = x;
 
                 board[y][x].sharknum = sn + 1;
-                board[y][x].t = K + 1;
+                board[y][x].t = K;
                 board[y][x].sharklive = true;
             }
         }
