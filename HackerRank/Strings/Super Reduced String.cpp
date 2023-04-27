@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <stack>
 
 using namespace std;
 
@@ -17,17 +18,22 @@ void Init() {
 }
 
 string solve() {
-    for (int i = 0; i < s.size(); i++) {
-        if (s[i] == s[i + 1]) {
-            s[i] = '0';
-            s[i + 1] = '0';
-        }
+    int size = s.size() - 1;
+    stack<char> temp;
+    temp.push(s[size]);
+    while (size--) {
+        if (temp.size() && temp.top() == s[size])
+            temp.pop();
+        else
+            temp.push(s[size]);
     }
-    for (int i = 0; i < s.size(); i++) {
-        if (s[i] != '0')
-            result = result + s[i];
+
+
+    while (temp.size()) {
+        result += temp.top();
+        temp.pop();
     }
-    if (result == "")
+    if (!result.size())
         return "Empty String";
     return result;
 }
