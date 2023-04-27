@@ -72,7 +72,6 @@ int solve() {
         }
 
     }
-
     calcu();
 
     return cnt;
