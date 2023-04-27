@@ -33,6 +33,7 @@ string solve() {
         result += temp.top();
         temp.pop();
     }
+
     if (!result.size())
         return "Empty String";
     return result;
