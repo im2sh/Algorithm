@@ -24,12 +24,11 @@ int main(void) {
             cnt++;
     }
 
-    if (cnt % 2 == 0 && cnt != 0) {
+    if (cnt >= 2 && cnt != 0) {
         cout << "I'm Sorry Hansoo" << "\n";
         return 0;
     } else {
         for (int i = 'Z'; i >= 'A'; i--) {
-
             if (sen_cnt[i] % 2 == 1 && sen_cnt[i] != 0) {
                 mid = char(i);
                 sen_cnt[i]--;
