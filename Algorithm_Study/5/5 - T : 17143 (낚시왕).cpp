@@ -44,14 +44,17 @@ void Init() {
 }
 
 void findAndCatchTarget(int x) {
+    target = {-1, -1};
     for (int y = 1; y <= R; y++) {
         if (shark[y][x].alive) {
             target = {y, x};
             break;
         }
     }
-    ret += shark[target.first][target.second].z;
-    shark[target.first][target.second].alive = false;
+    if (shark[target.first][target.second].alive) {
+        ret += shark[target.first][target.second].z;
+        shark[target.first][target.second].alive = false;
+    }
 }
 
 int changeDir(int d) {
@@ -115,7 +118,7 @@ void displayDir() {
     for (int y = 1; y <= R; y++) {
         for (int x = 1; x <= C; x++) {
             if (shark[y][x].alive)
-                cout << shark[y][x].d << " ";
+                cout << shark[y][x].alive << " ";
             else
                 cout << "x" << " ";
         }
@@ -132,13 +135,7 @@ void solve() {
     temp.s = 0;
     temp.alive = false;
     for (int i = 1; i <= C; i++) {
-        cout << i << '\n';
-        cout << "==================================" << '\n';
         fill(&temp_shark[0][0], &temp_shark[0][0] + 104 * 104, temp);
-        display();
-        cout << "\n";
-        displayDir();
-        cout << "\n";
         findAndCatchTarget(i);
         for (int y = 1; y <= R; y++) {
             for (int x = 1; x <= C; x++) {
@@ -146,14 +143,7 @@ void solve() {
                     move(y, x);
             }
         }
-        cout << '\n';
         memcpy(shark, temp_shark, sizeof(shark));
-        display();
-        cout << '\n';
-        displayDir();
-        cout << "\n";
-        cout << ret << "\n";
-        cout << "==================================" << '\n';
     }
 }
 
