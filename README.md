@@ -4,9 +4,9 @@
 
 기본 플랫폼 : Baekjoon, Leet Code, HackerRank</br>
 IDE : CLion, Online Platform . . .</br>
-Tech Blog : https://velog.io/@im2sh </br>
+Tech Blog : https://velog.io/@im2sh -> 꼼꼼하게 적으려다 보니 쉬운 문제도 풀이적는데 1시간 넘게 걸림. 요즘 너무 바빠서 일단 후순위로 둬서 작성 중지</br>
 
-Algorithm_Study : 학교 친구들과 스터디 그룹을 만들어 평상시 하루 2문제 / 시험 기간 하루 1문제는 무조건적인 약속으로 정함. 추가적으로 문제를 더 풀어도 됨
+Algorithm_Study : 학교 친구들과 스터디 그룹을 만들어서 풀던 문제 -> 현재 스터디 종료
 
 Solve : 개인적으로 푸는 문제 정리
 
