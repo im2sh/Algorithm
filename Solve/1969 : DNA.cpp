@@ -1,14 +1,12 @@
 #include <iostream>
 #include <vector>
-#include <map>
+#include <algorithm>
 
 using namespace std;
 
-int N, M;
+int N, M, sum;
 vector<string> DNA;
-int d[51][26];
 string ret;
-int hamming;
 
 void FastIO() {
     ios_base::sync_with_stdio(false);
@@ -23,40 +21,32 @@ void Init() {
         cin >> temp;
         DNA.push_back(temp);
     }
-    for (int i = 0; i < M; i++) {
-        ret.push_back(' ');
-    }
 }
 
 void solve() {
-    int k = 0;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
-            d[j][DNA[j][i] - 65]++;
-        }
-    }
-
     for (int i = 0; i < M; i++) {
-        map<char, int> temp;
-        int cnt = 0;
-        int maxN = 0;
-        for (int j = 0; j < 26; j++) {
-            temp[d[i][j] + 65]++;
+        int alphaCnt[26] = {0};
+        int maxNum = 0;
+        char maxAlpha;
+        for (int j = 0; j < N; j++) {
+            alphaCnt[DNA[j][i] - 'A']++;
+            maxNum = max(maxNum, alphaCnt[DNA[j][i] - 'A']);
         }
-
-        for (auto &a: temp) {
-            if (a.second > maxN) {
-                maxN = a.second;
-                ret[k++] = a.first;
+        for (int k = 0; k < 26; k++) {
+            if (alphaCnt[k] == maxNum) {
+                ret += k + 'A';
+                maxAlpha = k + 'A';
+                break;
             }
-            cnt++;
         }
-        if (cnt != 0)
-            hamming++;
+        for (int k = 0; k < 26; k++) {
+            if (k + 'A' != maxAlpha)
+                sum += alphaCnt[k];
+        }
     }
 
     cout << ret << "\n";
-    cout << hamming;
+    cout << sum;
 }
 
 int main(void) {
