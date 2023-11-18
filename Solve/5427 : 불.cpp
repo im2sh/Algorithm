@@ -39,16 +39,20 @@ void input() {
             if (building[y][x] == '*') {
                 fireWhere.push_back({y, x});
                 fire_visited[y][x] = 1;
-            } else if (building[y][x] == '@')
+            } else if (building[y][x] == '@') {
                 people = {y, x};
+                visited[y][x] = 1;
+            }
         }
     }
 }
 
-void fire(int y, int x) {
+void fire() {
     queue<pair<int, int>> q;
-    q.push({y, x});
-    fire_visited[y][x] = 1;
+    for (int i = 0; i < fireWhere.size(); i++) {
+        q.push({fireWhere[i].first, fireWhere[i].second});
+    }
+
 
     while (q.size()) {
         int cy = q.front().first;
@@ -67,10 +71,9 @@ void fire(int y, int x) {
     }
 }
 
-void move(int y, int x) {
+void move() {
     queue<pair<int, int>> q;
-    q.push({y, x});
-    visited[y][x] = 1;
+    q.push({people.first, people.second});
 
     while (q.size()) {
         int cy = q.front().first;
@@ -85,7 +88,8 @@ void move(int y, int x) {
             int ny = cy + dy[dir];
             int nx = cx + dx[dir];
 
-            if (ny < 0 || ny >= h || nx < 0 || nx >= w || visited[ny][nx] || building[ny][nx] == '#')
+            if (ny < 0 || ny >= h || nx < 0 || nx >= w || visited[ny][nx] || building[ny][nx] == '#' ||
+                building[ny][nx] == '*')
                 continue;
             if (visited[cy][cx] + 1 < fire_visited[ny][nx]) {
                 visited[ny][nx] = visited[cy][cx] + 1;
@@ -113,11 +117,8 @@ void display() {
 }
 
 void phase() {
-    for (int i = 0; i < fireWhere.size(); i++) {
-        fire(fireWhere[i].first, fireWhere[i].second);
-    }
-
-    move(people.first, people.second);
+    fire();
+    move();
     if (ret == 0)
         cout << "IMPOSSIBLE" << '\n';
     else
@@ -128,6 +129,7 @@ void solve() {
     while (tc--) {
         input();
         phase();
+        //display();
     }
 }
 
