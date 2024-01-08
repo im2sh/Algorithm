@@ -1,15 +1,10 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-int T, N, M, temp;
-int low, high, mid;
-int ret;
-
-vector<int> a;
-vector<int> b;
+vector<int> A, B;
+int T, N, M;
 
 void FastIO() {
     ios_base::sync_with_stdio(false);
@@ -21,36 +16,34 @@ void Init() {
     cin >> T;
 }
 
-void QInit() {
+void VInit() {
+    int temp;
     cin >> N >> M;
-    for (int j = 0; j < N; j++) {
+    for (int i = 0; i < N; i++) {
         cin >> temp;
-        a.push_back(temp);
+        A.push_back(temp);
     }
-
-    for (int j = 0; j < M; j++) {
+    for (int i = 0; i < M; i++) {
         cin >> temp;
-        b.push_back(temp);
+        B.push_back(temp);
     }
 }
 
 void solve() {
     for (int i = 0; i < T; i++) {
-        a.clear();
-        b.clear();
-
-        QInit();
-        sort(a.begin(), a.end());
-        sort(b.begin(), b.end());
-        ret = 0;
-
-        for (int x: a) {
-            low = 0;
-            high = M - 1;
+        int ret = 0;
+        A.clear();
+        B.clear();
+        VInit();
+        sort(A.begin(), A.end());
+        sort(B.begin(), B.end());
+        for (auto &it: A) {
+            int low = 0;
+            int high = M - 1;
 
             while (low <= high) {
-                mid = (low + high) / 2;
-                if (b[mid] < x) {
+                int mid = (low + high) / 2;
+                if (it > B[mid]) {
                     low = mid + 1;
                 } else {
                     high = mid - 1;
@@ -58,7 +51,7 @@ void solve() {
             }
             ret += low;
         }
-        cout << ret << "\n";
+        cout << ret << '\n';
     }
 }
 
@@ -68,5 +61,3 @@ int main(void) {
     solve();
     return 0;
 }
-
-
