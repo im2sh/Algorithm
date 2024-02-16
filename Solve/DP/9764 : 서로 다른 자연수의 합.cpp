@@ -1,3 +1,13 @@
+/*
+        D[i][j] = 1~j 사이의 수들의 합으로 i를 만드는 방법의 수
+		1. j를 포함하지 않고 i를 만드는 경우
+		    D[i][j] = D[i][j-1];
+		2. j를 포함해서 i를 만드는 경우
+		    if(i>=j)
+		        D[i][j] = (D[i][j] + D[i-j][j-1]) % mod ;
+		    D[i-j][j-1] : i-j를 1 ~ j-1 사이의 수들로 만드는 방법의 수
+ */
+
 #include <iostream>
 
 using namespace std;
