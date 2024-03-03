@@ -35,7 +35,7 @@ bool isLine(int node) {
     return false;
 }
 
-bool isDonut(int node) {
+bool isEight(int node) {
     if (indegree[node] == 2 && outdegree[node] == 2)
         return true;
     return false;
@@ -51,7 +51,7 @@ vector<int> solution(vector<vector<int>> edges) {
     for (int i = 1; i <= N; i++) {
         if (isLine(i))
             answer[2]++;
-        else if (isDonut(i))
+        else if (isEight(i))
             answer[3]++;
     }
     answer[1] = outdegree[answer[0]] - (answer[2] + answer[3]);
