@@ -1,645 +1,235 @@
+/*
+ * 1. 이동 후에 방향 바뀌는 것
+ * 2. 다른 상어를 잡아 먹는 것 (1만 잡아 먹을 수 있는 것이 아님.)
+ * 3. 같은 위치에 여러 상어가 존재할 때
+ */
+
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
+typedef struct shark {
+    int y;
+    int x;
+    int dir;
+    bool isAlive;
+    int prior[4][4];
+} Shark;
+
+typedef struct board {
+    vector<pair<int, int>> smell; // 냄새 뿌린 상어의 idx, 몇 번째 Turn
+} Board;
 
 const int dy[4] = {-1, 1, 0, 0};
 const int dx[4] = {0, 0, -1, 1};
 
 int N, M, K;
+Board BOARD[21][21];
+Shark SHARK[404];
+vector<pair<int, Shark>> MovingShark;
 
-struct Shark {
-    int y, x, dir;
-    int pri[4][4];
-};
-struct Board {
-    int sharknum; // Board에 상어 번호
-    int t;
-    bool sharklive; // 상어 위치
-};
-
-Board board[20][20];
-Shark shark[401];
-int ret = -1;
-
-void display_s() {
-    for (int y = 0; y < N; y++) {
-        for (int x = 0; x < N; x++) {
-            cout << board[y][x].sharknum << " ";
-        }
-        cout << "\n";
-    }
-    cout << "\n";
-}
-
-void display_t() {
-    for (int y = 0; y < N; y++) {
-        for (int x = 0; x < N; x++) {
-            cout << board[y][x].t << " ";
-        }
-        cout << "\n";
-    }
-    cout << "\n";
-}
-
-void display_live() {
-    for (int y = 0; y < N; y++) {
-        for (int x = 0; x < N; x++) {
-            cout << board[y][x].sharklive << " ";
-        }
-        cout << "\n";
-    }
-    cout << "\n";
-}
-
-bool sharkcheck() {
-    int cnt = 0;
-    for (int y = 0; y < N; y++) {
-        for (int x = 0; x < N; x++) {
-            if (board[y][x].sharklive == true) {
-                cnt++;
-            }
-        }
-    }
-    if (cnt == 1)
-        return true;
-    return false;
-}
-
-void go_shark() {
-    int sharkKill = M;
-    int time = 0;
-    bool isChange;
-    while (time <= 1000) {
-//        if (sharkKill == 1)
-//            return;
-        if (sharkcheck())
-            return;
-
-        time++;
-        cout << time << " " << sharkKill << "=================" << "\n";
-        display_s();
-        display_t();
-        display_live();
-        cout << time << "=================" << "\n";
-        Board temp_board[20][20] = {0,};
-
-        for (int y = 0; y < N; y++) {
-            for (int x = 0; x < N; x++) {
-                temp_board[y][x] = board[y][x];
-            }
-        }
-        for (int s = 0; s < M; s++) {
-            Shark ts = shark[s];
-            if (ts.y == -1)
-                continue;
-
-            int cy = ts.y;
-            int cx = ts.x;
-            int cd = ts.dir;
-            isChange = false;
-            for (int d = 0; d < 4; d++) {
-                int ny = cy + dy[ts.pri[cd][d]];
-                int nx = cx + dx[ts.pri[cd][d]];
-
-                if (ny < 0 || ny >= N || nx < 0 || nx >= N || board[ny][nx].t != 0)
-                    continue;
-                isChange = true;
-                temp_board[cy][cx].sharklive = false;
-                if (temp_board[ny][nx].sharknum == 0) {
-                    temp_board[ny][nx].sharknum = s + 1;
-                    temp_board[ny][nx].sharklive = true;
-                    temp_board[ny][nx].t = K;
-
-
-                    shark[s].y = ny;
-                    shark[s].x = nx;
-                    shark[s].dir = ts.pri[cd][d];
-                } else if (temp_board[ny][nx].sharklive) {
-                    sharkKill--;
-                    shark[s].y = -1;
-                }
-                break;
-            }
-            if (!isChange) {
-                for (int d = 0; d < 4; d++) {
-                    int ny = cy + dy[ts.pri[cd][d]];
-                    int nx = cy + dx[ts.pri[cd][d]];
-
-                    if (ny < 0 || ny >= N || nx < 0 || nx >= N)
-                        continue;
-                    if (board[ny][nx].t != 0 && board[ny][nx].sharknum != s + 1)
-                        continue;
-                    temp_board[cy][cx].sharklive = false;
-                    if (temp_board[ny][nx].sharknum == s + 1) {
-                        isChange = true;
-                        temp_board[ny][nx].sharknum = s + 1;
-                        temp_board[ny][nx].sharklive = true;
-                        temp_board[ny][nx].t = K;
-
-                        //temp_board[cy][cx].sharklive = false;
-
-                        shark[s].y = ny;
-                        shark[s].x = nx;
-                        shark[s].dir = ts.pri[cd][d];
-                    }
-                    if (!isChange) {
-                        temp_board[cy][cx].sharklive = false;
-                        shark[s].y = -1;
-                        sharkKill--;
-                    }
-                    break;
-                }
-            }
-        }
-
-        for (int y = 0; y < N; y++) {
-            for (int x = 0; x < N; x++) {
-                board[y][x] = temp_board[y][x];
-                if (board[y][x].t > 0)
-                    board[y][x].t--;
-                if (board[y][x].t == 0)
-                    board[y][x].sharknum = 0;
-            }
-        }
-        ret = time;
-    }
+void FastIO() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
 }
 
 void Init() {
+    int temp;
     cin >> N >> M >> K;
-
-    for (int y = 0; y < N; ++y) {
-        for (int x = 0; x < N; ++x) {
-            cin >> board[y][x].sharknum;
-            if (board[y][x].sharknum != 0) {
-                int sn = board[y][x].sharknum - 1;
-                shark[sn].y = y;
-                shark[sn].x = x;
-
-                board[y][x].sharknum = sn + 1;
-                board[y][x].t = K;
-                board[y][x].sharklive = true;
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < N; x++) {
+            cin >> temp;
+            if (temp != 0) {
+                SHARK[temp - 1].y = y;
+                SHARK[temp - 1].x = x;
+                SHARK[temp - 1].isAlive = true;
+                BOARD[y][x].smell.push_back({temp - 1, K});
             }
         }
     }
-    int temp;
     for (int i = 0; i < M; i++) {
         cin >> temp;
-        shark[i].dir = temp - 1;
+        SHARK[i].dir = temp - 1;
     }
 
     for (int i = 0; i < M; i++) {
         for (int j = 0; j < 4; j++) {
             for (int k = 0; k < 4; k++) {
                 cin >> temp;
-                shark[i].pri[j][k] = temp - 1;
+                SHARK[i].prior[j][k] = temp - 1;
             }
         }
     }
 }
 
-int main(void) {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-
-    Init();
-    go_shark();
-
-    cout << ret << "\n";
+bool oneSharkLive() {
+    for (int i = 1; i < M; i++) {
+        if (SHARK[i].isAlive)
+            return false;
+    }
+    return true;
 }
 
+void sharkMove() {
+    for (int i = 0; i < M; i++) {
+        Shark S = SHARK[i];
+        if (!S.isAlive)
+            continue;
 
-//#include <iostream>
-//#include <deque>
-//#include <queue>
-//
-//using namespace std;
-//
-//struct Pos {
-//    int y;
-//    int x;
-//};
-//
-//struct Board {
-//    Pos pos;
-//    bool s; // 냄새
-//    int t; // 남은 시간
-//    int who;
-//    bool now;
-//};
-//
-//struct Shark {
-//    Pos pos;
-//    int size;
-//    int pri_d[4][4];
-//    int dir;
-//};
-//
-//const int dy[4] = {-1, 1, 0, 0};
-//const int dx[4] = {0, 0, -1, 1};
-//
-//deque<Shark> shark;
-//Board board[20][20];
-//int sea[20][20];
-//int N, M, K;
-//int cnt = 0;
-//int tryN = 0;
-//
-//int selectDir(Shark s) {
-//    int dir = s.dir;
-//    switch (dir) {
-//        case 1:
-//            return 0;
-//        case 2:
-//            return 1;
-//        case 3:
-//            return 2;
-//        case 4:
-//            return 3;
-//    }
-//}
-//
-//void smell_check() {
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            if (board[y][x].s == 1 && board[y][x].now == true) {
-//                board[y][x].t--;
-//                if (board[y][x].t == 0) {
-//                    board[y][x].who = 0;
-//                    board[y][x].s = 0;
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//void display_s() {
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            cout << board[y][x].who << " ";
-//        }
-//        cout << "\n";
-//    }
-//    cout << "\n";
-//}
-//
-//void display_t() {
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            cout << board[y][x].t << " ";
-//        }
-//        cout << "\n";
-//    }
-//    cout << "\n";
-//}
-//
-//int aa = 15;
-//int temp_c;
-//vector<Pos> temp_pos[4];
-//vector<int> xxdir;
-//int totalN;
-//int killShark;
-//
-//void go_shark() {
-//    while (true) {
-//        display_s();
-//        cout << tryN << "=========================================================\n";
-//        display_t();
-//        //cout << "=========================================================\n";
-//        cnt++;
-//        tryN++;
-//        if (killShark == M - 1)
-//            break;
-//        if (tryN > 1000) {
-//            tryN = -1;
-//            return;
-//        }
-//        for (int q = 0; q < M; q++) {
-//            if (shark[q].size == -1)
-//                break;
-//            Shark temp = shark[q];
-//            board[temp.pos.y][temp.pos.x].now = true;
-//            int dir = selectDir(temp);
-//
-//            temp_c = 0;
-//            for (int d = 0; d < 4; d++, temp_c++) {
-//                int sdir = temp.pri_d[dir][d];
-//                int ny = dy[sdir] + temp.pos.y;
-//                int nx = dx[sdir] + temp.pos.x;
-//
-//                if (ny < 0 || ny >= N || nx < 0 || nx >= N)
-//                    continue;
-//                if (board[ny][nx].who == 0) {
-//                    board[ny][nx].who = temp.size;
-//                    board[ny][nx].s = true;
-//                    board[ny][nx].t = K;
-//                    board[ny][nx].now = false;
-//
-//                    shark[q].pos.y = ny;
-//                    shark[q].pos.x = nx;
-//                    shark[q].dir = sdir + 1;
-//                    break;
-//                } else if (board[ny][nx].who < temp.size) {
-//                    shark[q].size = -1;
-//                    killShark++;
-//                    break;
-//                } else {
-//                    if (board[ny][nx].who == temp.size) {
-//                        temp_pos[temp.size - 1].push_back({ny, nx});
-//                        xxdir.push_back(sdir);
-//                    }
-//
-//                    if (temp_c == 3) {
-//                        Pos p = temp_pos[temp.size - 1].front();
-//                        board[p.y][p.x].t = K;
-//                        board[p.y][p.x].now = false;
-//
-//                        shark[q].pos.y = p.y;
-//                        shark[q].pos.x = p.x;
-//                        shark[q].dir = xxdir[0];
-//                        xxdir.clear();
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        smell_check();
-//        if (shark.size() == 1)
-//            return;
-//    }
-//}
-//
-//bool cmp(Shark s1, Shark s2) {
-//    return s1.size < s2.size;
-//}
-//
-//void Init() {
-//    cin >> N >> M >> K;
-//    int temp;
-//    Shark tempS;
-//
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            cin >> temp;
-//            board[y][x].pos = {y, x};
-//            board[y][x].s = 0;
-//            board[y][x].t = 0;
-//            board[y][x].who = 0;
-//            sea[y][x] = temp;
-//            if (sea[y][x] != 0) {
-//                tempS.pos = {y, x};
-//                tempS.dir = 0;
-//                tempS.size = temp;
-//                shark.push_back(tempS);
-//
-//                board[y][x].pos = {y, x};
-//                board[y][x].s = true;
-//                board[y][x].t = K;
-//                board[y][x].who = temp;
-//                board[y][x].now = true;
-//            }
-//        }
-//    }
-//
-//    sort(shark.begin(), shark.end(), cmp);
-//
-//    for (int i = 0; i < M; i++) {
-//        cin >> shark[i].dir;
-//    }
-//
-//    int temp_dir;
-//
-//    for (int i = 0; i < M; i++) {
-//        for (int j = 0; j < 4; j++) {
-//            for (int k = 0; k < 4; k++) {
-//                cin >> temp_dir;
-//                shark[i].pri_d[j][k] = temp_dir - 1;
-//            }
-//        }
-//    }
-//}
-//
-//int main(void) {
-//    ios_base::sync_with_stdio(false);
-//    cin.tie(NULL);
-//    cout.tie(NULL);
-//
-//
-//    Init();
-//    go_shark();
-//    cout << tryN << "\n";
-//}
+        int cy = S.y;
+        int cx = S.x;
+        int canMoveCnt = 0;
+        pair<int, int> nextDir;
+        int tempDir = 0;
+        for (int dir = 0; dir < 4; dir++) {
+            int ny = cy + dy[dir];
+            int nx = cx + dx[dir];
 
+            if (ny < 0 || ny >= N || nx < 0 || nx >= N)
+                continue;
 
+            if (BOARD[ny][nx].smell.empty()) {
+                canMoveCnt++;
+                nextDir = {ny, nx};
+                tempDir = dir;
+            }
+        }
+        if (canMoveCnt == 1) { //아무 냄새 없는 곳이 1곳인 경우
+            int ny = nextDir.first;
+            int nx = nextDir.second;
+            if (ny < 0 || ny >= N || nx < 0 || nx >= N)
+                continue;
 
-//#include <iostream>
-//#include <deque>
-//#include <queue>
-//
-//using namespace std;
-//
-//struct Pos {
-//    int y;
-//    int x;
-//};
-//
-//struct Board {
-//    Pos pos;
-//    bool s; // 냄새
-//    int t; // 남은 시간
-//    int who;
-//    bool now;
-//};
-//
-//struct Shark {
-//    Pos pos;
-//    int size;
-//    int pri_d[4][4];
-//    int dir;
-//};
-//
-//const int dy[4] = {-1, 1, 0, 0};
-//const int dx[4] = {0, 0, -1, 1};
-//
-//deque<Shark> shark;
-//Board board[20][20];
-//int sea[20][20];
-//int N, M, K;
-//int cnt = 0;
-//int tryN = 0;
-//
-//int selectDir(Shark s) {
-//    int dir = s.dir;
-//    switch (dir) {
-//        case 1:
-//            return 0;
-//        case 2:
-//            return 1;
-//        case 3:
-//            return 2;
-//        case 4:
-//            return 3;
-//    }
-//}
-//
-//void smell_check() {
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            if (board[y][x].s == 1 && board[y][x].now == true) {
-//                board[y][x].t--;
-//                if (board[y][x].t == 0) {
-//                    board[y][x].who = 0;
-//                    board[y][x].s = 0;
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//void display() {
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            cout << board[y][x].t << " ";
-//        }
-//        cout << "\n";
-//    }
-//    cout << "\n";
-//}
-//
-//int aa = 15;
-//int temp_c;
-//vector<Pos> temp_pos[4];
-//
-//void go_shark() {
-//    while (true) {
-//        display();
-//        cnt++;
-//        if (shark.size() == 1) {
-//            return;
-//        } else if (tryN > 1000) {
-//            tryN = -1;
-//            return;
-//        }
-//
-//        bool flag = true;
-//        Shark temp = shark.front();
-//        shark.pop_front();
-//        board[temp.pos.y][temp.pos.x].now = true;
-//        int dir = selectDir(temp);
-//
-//        temp_c = 0;
-//        for (int d = 0; d < 4; d++, temp_c++) {
-//            int sdir = temp.pri_d[dir][d];
-//            int ny = dy[sdir] + temp.pos.y;
-//            int nx = dx[sdir] + temp.pos.x;
-//
-//            if (ny < 0 || ny >= N || nx < 0 || nx >= N)
-//                continue;
-//            if (board[ny][nx].who == 0) {
-//                board[ny][nx].who = temp.size;
-//                board[ny][nx].s = true;
-//                board[ny][nx].t = K;
-//                board[ny][nx].now = false;
-//
-//                temp.pos.y = ny;
-//                temp.pos.x = nx;
-//                temp.dir = sdir + 1;
-//                if (cnt == shark.size() + 1) {
-//                    smell_check();
-//                    cnt = 0;
-//                    tryN++;
-//                }
-//                break;
-//            } else if (board[ny][nx].who < temp.size) {
-//                if (cnt == shark.size() + 1) {
-//                    smell_check();
-//                    cnt = 0;
-//                    tryN++;
-//                }
-//                flag = false;
-//                break;
-//            }
-//
-//            if (board[ny][nx].who == temp.size) {
-//                temp_pos[temp.size - 1].push_back({ny, nx});
-//            }
-//
-//            if (temp_c == 4) {
-//                if (cnt == shark.size() + 1) {
-//                    tryN++;
-//                    smell_check();
-//                    cnt = 0;
-//                }
-//                Pos p = temp_pos[temp.size - 1].front();
-//                board[p.y][p.x].t = K;
-//                break;
-//            }
-//        }
-//
-//        if (flag == true)
-//            shark.push_back(temp);
-//
-//    }
-//}
-//
-//bool cmp(Shark s1, Shark s2) {
-//    return s1.size < s2.size;
-//}
-//
-//void Init() {
-//    cin >> N >> M >> K;
-//    int temp;
-//    Shark tempS;
-//
-//    for (int y = 0; y < N; y++) {
-//        for (int x = 0; x < N; x++) {
-//            cin >> temp;
-//            board[y][x].pos = {y, x};
-//            board[y][x].s = 0;
-//            board[y][x].t = 0;
-//            board[y][x].who = 0;
-//            sea[y][x] = temp;
-//            if (sea[y][x] != 0) {
-//                tempS.pos = {y, x};
-//                tempS.dir = 0;
-//                tempS.size = temp;
-//                shark.push_back(tempS);
-//
-//                board[y][x].pos = {y, x};
-//                board[y][x].s = true;
-//                board[y][x].t = K;
-//                board[y][x].who = temp;
-//                board[y][x].now = true;
-//            }
-//        }
-//    }
-//
-//    sort(shark.begin(), shark.end(), cmp);
-//
-//    for (int i = 0; i < M; i++) {
-//        cin >> shark[i].dir;
-//    }
-//
-//    int temp_dir;
-//
-//    for (int i = 0; i < M; i++) {
-//        for (int j = 0; j < 4; j++) {
-//            for (int k = 0; k < 4; k++) {
-//                cin >> temp_dir;
-//                shark[i].pri_d[j][k] = temp_dir - 1;
-//            }
-//        }
-//    }
-//}
-//
-//int main(void) {
-//    ios_base::sync_with_stdio(false);
-//    cin.tie(NULL);
-//    cout.tie(NULL);
-//
-//
-//    Init();
-//    go_shark();
-//    cout << tryN << "\n";
-//}
+            SHARK[i].y = ny;
+            SHARK[i].x = nx;
+            SHARK[i].dir = tempDir;
+            MovingShark.push_back({i, SHARK[i]});
+        } else if (canMoveCnt > 1) { //갈 수 있는 곳이 여러 곳인 경우
+            int sd = S.dir;
+            bool canMove = false;
+            for (int dir = 0; dir < 4; dir++) {
+                int ny = cy + dy[S.prior[sd][dir]];
+                int nx = cx + dx[S.prior[sd][dir]];
+
+                if (canMove)
+                    break;
+
+                if (ny < 0 || ny >= N || nx < 0 || nx >= N)
+                    continue;
+                if (BOARD[ny][nx].smell.size())
+                    continue;
+
+                canMove = true;
+                SHARK[i].y = ny;
+                SHARK[i].x = nx;
+                SHARK[i].dir = S.prior[sd][dir];
+                MovingShark.push_back({i, SHARK[i]});
+            }
+
+        } else { // canMoveCnt가 0인 경우
+            int sd = S.dir;
+            bool canMove = false;
+            for (int dir = 0; dir < 4; dir++) {
+                int ny = cy + dy[S.prior[sd][dir]];
+                int nx = cx + dx[S.prior[sd][dir]];
+                if (canMove)
+                    break;
+                if (ny < 0 || ny >= N || nx < 0 || nx >= N)
+                    continue;
+
+                for (int j = 0; j < BOARD[ny][nx].smell.size(); j++) {
+                    if (i == BOARD[ny][nx].smell[j].first) {
+                        canMove = true;
+                        SHARK[i].y = ny;
+                        SHARK[i].x = nx;
+                        SHARK[i].dir = S.prior[sd][dir];
+                        BOARD[ny][nx].smell[j].first = i;
+                        BOARD[ny][nx].smell[j].second = K + 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < MovingShark.size(); i++) {
+        int idx = MovingShark[i].first;
+        int cy = MovingShark[i].second.y;
+        int cx = MovingShark[i].second.x;
+        BOARD[cy][cx].smell.push_back({idx, K + 1});
+    }
+}
+
+bool cmp(pair<int, int> a, pair<int, int> b) {
+    return a.second > b.second;
+}
+
+void oneTurnEnd() {
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < N; x++) {
+            if (!BOARD[y][x].smell.empty()) {
+                for (int i = 0; i < BOARD[y][x].smell.size(); i++) {
+                    BOARD[y][x].smell[i].second--;
+                }
+
+                sort(BOARD[y][x].smell.begin(), BOARD[y][x].smell.end(), cmp);
+                while (true) {
+                    int lastN = BOARD[y][x].smell.back().second;
+                    if (lastN > 0 || BOARD[y][x].smell.empty())
+                        break;
+                    BOARD[y][x].smell.pop_back();
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < M; i++) {
+        if (!SHARK[i].isAlive)
+            continue;
+        for (int j = i + 1; j < M; j++) {
+            if (SHARK[i].y == SHARK[j].y && SHARK[i].x == SHARK[j].x) {
+                SHARK[j].y = 99999;
+                SHARK[j].x = 99999;
+                SHARK[j].isAlive = false;
+            }
+        }
+    }
+}
+
+void display() {
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < N; x++) {
+            if (BOARD[y][x].smell.size()) {
+                cout << "{" << BOARD[y][x].smell[0].first << "," << BOARD[y][x].smell[0].second << "}" << ' ';
+            } else {
+                cout << "{0, 0}" << ' ';
+            }
+        }
+        cout << '\n';
+    }
+    cout << '\n';
+}
+
+void solve() {
+    int ret = 0;
+    while (!oneSharkLive()) {
+        if (ret >= 1000) {
+            cout << "-1";
+            return;
+        }
+        sharkMove();
+        oneTurnEnd();
+        MovingShark.clear();
+        ret++;
+    }
+    cout << ret;
+}
+
+int main(void) {
+    FastIO();
+    Init();
+    solve();
+    return 0;
+}
