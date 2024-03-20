@@ -4,6 +4,12 @@
 #include <queue>
 #include <cstring>
 
+/**
+ * 최대 범위는 (N * N) - 1
+ * dq에 값이 없을 때(복사를 한 값이 N * N보다 작을 때) 복원시키는 과정에서 0을 넣어야함
+ * 0밖에 없을 때, dq size는 0이기 때문에 복사하는 과정에서 size 체크 해줘야함 (안 해주면 dq size는 0인데 167 ~ 176 실행됨)
+ */
+
 using namespace std;
 
 typedef struct pos {
