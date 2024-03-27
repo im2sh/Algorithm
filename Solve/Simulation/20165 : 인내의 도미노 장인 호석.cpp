@@ -73,8 +73,6 @@ void attack(int y, int x, int dir) {
 }
 
 void defense(int y, int x) {
-    if (BOARD[y][x] != 0)
-        ret--;
     BOARD[y][x] = ORIGINAL[y][x];
 }
 
@@ -91,7 +89,7 @@ void solve() {
             else
                 cout << "S" << ' ';
         }
-        if(y != N - 1)
+        if (y != N - 1)
             cout << '\n';
     }
 }
