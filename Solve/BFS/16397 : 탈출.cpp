@@ -15,6 +15,7 @@ void FastIO() {
 
 void Init() {
     cin >> N >> T >> G;
+    fill(&visited[0], &visited[0] + 100001, 987654321);
 }
 
 void go() {
@@ -39,10 +40,10 @@ void go() {
             if (it > 99999)
                 continue;
             if (it == cur + 1) {
-                if (visited[it])
-                    continue;
-                q.push({it, cnt + 1});
-                visited[it] = 1;
+                if (visited[it] > cnt + 1) {
+                    visited[it] = cnt + 1;
+                    q.push({it, cnt + 1});
+                }
             } else {
                 string temp = to_string(it);
                 if (it == 0)
@@ -52,10 +53,11 @@ void go() {
                 int tc = ti + '0';
                 temp[0] = tc;
                 int next = stoi(temp);
-                if (visited[next])
-                    continue;
-                q.push({next, cnt + 1});
-                visited[next] = 1;
+
+                if (visited[next] > cnt + 1) {
+                    visited[next] = cnt + 1;
+                    q.push({next, cnt + 1});
+                }
             }
         }
     }
