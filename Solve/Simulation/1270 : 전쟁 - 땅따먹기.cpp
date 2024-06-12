@@ -31,7 +31,6 @@ void solve() {
                 ret = temp;
             }
         }
-
         int half = M / 2;
         if (maxNum > half) {
             cout << ret << '\n';
