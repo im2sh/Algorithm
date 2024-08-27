@@ -47,6 +47,7 @@ void Init() {
 int go() {
     int temp = 0;
     int minNum = min(burger.size(), min(side.size(), drink.size()));
+
     for (int i = 0; i < minNum; i++) {
         temp += burger[i] * 0.9;
         temp += side[i] * 0.9;
