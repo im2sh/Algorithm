@@ -20,14 +20,14 @@ void Init() {
         cin >> temp;
         arr.push_back(temp);
     }
-    sort(arr.begin(), arr.end());
+    sort(arr.begin(), arr.end(), greater<>());
 }
 
 void solve() {
-    for (int i = 0; i < (N + 1) / 2; i++) {
+    for (int i = (N + 1) / 2; i < N; i++) {
         aCnt += arr[i];
     }
-    for (int i = (N + 1) / 2; i < N; i++) {
+    for (int i = 0; i < (N + 1) / 2; i++) {
         bCnt += arr[i];
     }
     cout << aCnt << " " << bCnt;
